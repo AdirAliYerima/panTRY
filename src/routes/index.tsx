@@ -46,6 +46,8 @@ const STATUS: Record<AppState, string> = {
   thinking: "Building your meal plan…",
   plan: "Pick a meal to dive in",
   detail: "Ready when you are",
+  reviewing: "Take a closer look",
+  checking: "Pantry check",
   grocery: "Your shopping list",
   cooking: "Cooking together",
 };
