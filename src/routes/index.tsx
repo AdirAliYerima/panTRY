@@ -8,6 +8,8 @@ import { FoodCollage } from "@/components/FoodCollage";
 import { VoiceOrb } from "@/components/VoiceOrb";
 import { MealCards } from "@/components/MealCards";
 import { MealDetail } from "@/components/MealDetail";
+import { MealReview } from "@/components/MealReview";
+import { IngredientChecklist } from "@/components/IngredientChecklist";
 import { CookingMode } from "@/components/CookingMode";
 import { GroceryList } from "@/components/GroceryList";
 import { DEMO_MEALS } from "@/lib/demo";
