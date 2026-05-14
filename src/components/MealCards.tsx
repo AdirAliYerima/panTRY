@@ -53,7 +53,7 @@ export function MealCards({
               style={{ filter: "drop-shadow(0 16px 20px rgba(120,70,30,0.22))" }}
             />
           </div>
-          <p className="text-xs uppercase tracking-[0.18em] text-amber" style={{ color: "var(--amber)" }}>
+          <p className="text-[10px] uppercase tracking-[0.24em]" style={{ color: "var(--tomato)", fontWeight: 600 }}>
             {meal.cuisine}
           </p>
           <h3 className="mt-1 font-display text-2xl leading-tight">{meal.name}</h3>
