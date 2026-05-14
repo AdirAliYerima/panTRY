@@ -79,7 +79,13 @@ const toneStyles: Record<Pill["tone"], React.CSSProperties> = {
   },
 };
 
-export function FoodCollage({ blurred }: { blurred?: boolean }) {
+export function FoodCollage({
+  blurred,
+  generating,
+}: {
+  blurred?: boolean;
+  generating?: boolean;
+}) {
   return (
     <div
       className="pointer-events-none absolute inset-0 transition-all duration-700"
