@@ -207,17 +207,116 @@ function PantryApp() {
     });
   };
 
-  /** Demo: jump straight into a fully populated meal plan so designers
-   *  can preview the plan/detail/grocery/cooking screens. */
-  const loadDemo = (target: AppState = "plan") => {
-    stopSpeaking();
+  /** Demo: launch the sample plan with assistant narration that walks
+   *  through each of the three meals, highlighting the relevant card. */
+  const loadDemo = () => {
+    clearNarration();
     setError(null);
     setBudget("$30");
     setRawRequest("$30 for the week, mostly vegetarian, easy weeknight meals");
-    setMeals(DEMO_MEALS);
-    setSelected(DEMO_MEALS[0]);
-    setHaveSet(new Set(["Olive oil", "Garlic", "Yellow onion"]));
-    setState(target);
+    const demo = DEMO_MEALS.slice(0, 3);
+    setMeals(demo);
+    setSelected(null);
+    setHaveSet(new Set());
+    setState("plan");
+
+    // Schedule narration after the page transitions in
+    const schedule = (delay: number, fn: () => void) => {
+      const id = window.setTimeout(fn, delay);
+      narrationTimers.current.push(id);
+    };
+
+    const intro = "Here are three meals I think you'll love. Let me walk you through them.";
+    schedule(900, () => {
+      setNarrationLine(intro);
+      speak(intro);
+    });
+
+    let cursor = 900 + 4200;
+    demo.forEach((meal, i) => {
+      schedule(cursor, () => {
+        setNarrationIndex(i);
+        const line = `${meal.name}. ${meal.description}`;
+        setNarrationLine(line);
+        speak(line);
+      });
+      cursor += 6800;
+    });
+
+    schedule(cursor, () => {
+      setNarrationIndex(null);
+      const line = "Which one sounds good? Tap any meal to dive in.";
+      setNarrationLine(line);
+      speak(line);
+    });
+  };
+
+  const pickMeal = (m: Meal) => {
+    clearNarration();
+    setSelected(m);
+    setState("reviewing");
+    const line = `Great choice. ${m.name}. Want to go forward with this one?`;
+    window.setTimeout(() => {
+      setNarrationLine(line);
+      speak(line);
+    }, 350);
+  };
+
+  const startChecking = () => {
+    if (!selected) return;
+    clearNarration();
+    setHaveSet(new Set());
+    setCheckIndex(0);
+    setState("checking");
+    const first = selected.ingredients[0];
+    const line = `Let's check your pantry. Do you have ${first.name}?`;
+    window.setTimeout(() => {
+      setNarrationLine(line);
+      speak(line);
+    }, 300);
+  };
+
+  const answerIngredient = (have: boolean) => {
+    if (!selected) return;
+    const ing = selected.ingredients[checkIndex];
+    if (have) {
+      setHaveSet((s) => {
+        const next = new Set(s);
+        next.add(ing.name);
+        return next;
+      });
+    }
+    const next = checkIndex + 1;
+    setCheckIndex(next);
+    if (next < selected.ingredients.length) {
+      const nextIng = selected.ingredients[next];
+      const line = have
+        ? `Good. Next — ${nextIng.name}?`
+        : `No problem, I'll add that. Next — ${nextIng.name}?`;
+      setNarrationLine(line);
+      speak(line);
+    } else {
+      const line = "All done. Let me show you what you'll need.";
+      setNarrationLine(line);
+      speak(line);
+    }
+  };
+
+  const finishChecking = () => {
+    if (!selected) return;
+    const need = selected.ingredients.filter((i) => !haveSet.has(i.name));
+    setState(need.length === 0 ? "cooking" : "grocery");
+  };
+
+  const resetAll = () => {
+    clearNarration();
+    setMeals([]);
+    setSelected(null);
+    setHaveSet(new Set());
+    setBudget(null);
+    setRawRequest("");
+    setCheckIndex(0);
+    setState("idle");
   };
 
   const showHero =
