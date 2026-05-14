@@ -504,7 +504,7 @@ function PantryApp() {
                   </button>
                   <span className="h-3 w-px" style={{ background: "color-mix(in oklab, var(--ink) 18%, transparent)" }} />
                   <button
-                    onClick={() => loadDemo("plan")}
+                    onClick={loadDemo}
                     className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] hover:text-foreground"
                     style={{ color: "var(--tomato)" }}
                   >
