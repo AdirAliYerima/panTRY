@@ -191,6 +191,19 @@ function PantryApp() {
     });
   };
 
+  /** Demo: jump straight into a fully populated meal plan so designers
+   *  can preview the plan/detail/grocery/cooking screens. */
+  const loadDemo = (target: AppState = "plan") => {
+    stopSpeaking();
+    setError(null);
+    setBudget("$30");
+    setRawRequest("$30 for the week, mostly vegetarian, easy weeknight meals");
+    setMeals(DEMO_MEALS);
+    setSelected(DEMO_MEALS[0]);
+    setHaveSet(new Set(["Olive oil", "Garlic", "Yellow onion"]));
+    setState(target);
+  };
+
   const showHero =
     state === "idle" || state === "listening" || state === "thinking" || state === "confirming";
 
