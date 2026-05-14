@@ -30,6 +30,7 @@ export type Meal = {
 export type AppState =
   | "idle"
   | "listening"
+  | "confirming"
   | "thinking"
   | "plan"
   | "detail"
