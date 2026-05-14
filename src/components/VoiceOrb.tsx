@@ -71,7 +71,7 @@ export function VoiceOrb({
           <Mic className="h-10 w-10" style={{ color: "var(--forest-deep)" }} strokeWidth={2.4} />
         )}
       </motion.span>
-    </button>
+    </motion.button>
   );
 }
 
