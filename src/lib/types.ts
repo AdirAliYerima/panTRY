@@ -34,5 +34,7 @@ export type AppState =
   | "thinking"
   | "plan"
   | "detail"
+  | "reviewing"
+  | "checking"
   | "grocery"
   | "cooking";
