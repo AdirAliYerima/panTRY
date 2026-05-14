@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { Keyboard, Send, Check, X, Mic } from "lucide-react";
+import { Keyboard, Send, Check, X, Mic, Sparkles } from "lucide-react";
 import type { AppState, Meal } from "@/lib/types";
 import { getRecognition, speak, stopSpeaking } from "@/lib/speech";
 import { FoodCollage } from "@/components/FoodCollage";
@@ -10,6 +10,7 @@ import { MealCards } from "@/components/MealCards";
 import { MealDetail } from "@/components/MealDetail";
 import { CookingMode } from "@/components/CookingMode";
 import { GroceryList } from "@/components/GroceryList";
+import { DEMO_MEALS } from "@/lib/demo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
