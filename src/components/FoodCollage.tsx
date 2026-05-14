@@ -79,7 +79,13 @@ const toneStyles: Record<Pill["tone"], React.CSSProperties> = {
   },
 };
 
-export function FoodCollage({ blurred }: { blurred?: boolean }) {
+export function FoodCollage({
+  blurred,
+  generating,
+}: {
+  blurred?: boolean;
+  generating?: boolean;
+}) {
   return (
     <div
       className="pointer-events-none absolute inset-0 transition-all duration-700"
@@ -90,47 +96,56 @@ export function FoodCollage({ blurred }: { blurred?: boolean }) {
       aria-hidden
     >
       {/* High-res food photo cards */}
-      {photos.map((p, i) => (
-        <motion.div
-          key={`photo-${i}`}
-          initial={{ opacity: 0, scale: 0.85, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: p.delay, duration: 0.9, ease: [0.22, 0.9, 0.3, 1] }}
-          className="absolute"
-          style={{
-            top: p.top,
-            bottom: p.bottom,
-            left: p.left,
-            right: p.right,
-            width: p.w,
-            height: p.h,
-          }}
-        >
-          <div
-            className="animate-float h-full w-full overflow-hidden rounded-[28px]"
-            style={
-              {
-                "--dx": p.dx,
-                "--dy": p.dy,
-                "--rot": `${p.rot}deg`,
-                animationDelay: `${i * 0.7}s`,
-                boxShadow:
-                  "0 30px 60px -22px rgba(80,40,15,0.35), 0 10px 20px -10px rgba(80,40,15,0.25), inset 0 0 0 1px rgba(255,255,255,0.55)",
-                transform: `rotate(${p.rot}deg)`,
-              } as React.CSSProperties
-            }
+      {photos.map((p, i) => {
+        const driftX = generating ? (p.left ? -50 : p.right ? 50 : 0) : 0;
+        const driftY = generating ? (p.top ? -30 : p.bottom ? 30 : 0) : 0;
+        return (
+          <motion.div
+            key={`photo-${i}`}
+            initial={{ opacity: 0, scale: 0.85, y: 30 }}
+            animate={{
+              opacity: 1,
+              scale: generating ? 1.05 : 1,
+              x: driftX,
+              y: driftY,
+            }}
+            transition={{ delay: p.delay, duration: 1.4, ease: [0.22, 0.9, 0.3, 1] }}
+            className="absolute"
+            style={{
+              top: p.top,
+              bottom: p.bottom,
+              left: p.left,
+              right: p.right,
+              width: p.w,
+              height: p.h,
+            }}
           >
-            <img
-              src={p.src}
-              alt={p.alt}
-              width={p.w * 2}
-              height={p.h * 2}
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
-          </div>
-        </motion.div>
-      ))}
+            <div
+              className="animate-float h-full w-full overflow-hidden rounded-[28px]"
+              style={
+                {
+                  "--dx": p.dx,
+                  "--dy": p.dy,
+                  "--rot": `${p.rot}deg`,
+                  animationDelay: `${i * 0.7}s`,
+                  boxShadow:
+                    "0 30px 60px -22px rgba(80,40,15,0.35), 0 10px 20px -10px rgba(80,40,15,0.25), inset 0 0 0 1px rgba(255,255,255,0.55)",
+                  transform: `rotate(${p.rot}deg)`,
+                } as React.CSSProperties
+              }
+            >
+              <img
+                src={p.src}
+                alt={p.alt}
+                width={p.w * 2}
+                height={p.h * 2}
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </motion.div>
+        );
+      })}
 
       {/* Ingredient pills */}
       {pills.map((p, i) => (

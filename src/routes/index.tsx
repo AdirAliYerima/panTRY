@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { Keyboard, Send, Check, X, Mic } from "lucide-react";
+import { Keyboard, Send, Check, X, Mic, Sparkles } from "lucide-react";
 import type { AppState, Meal } from "@/lib/types";
 import { getRecognition, speak, stopSpeaking } from "@/lib/speech";
 import { FoodCollage } from "@/components/FoodCollage";
@@ -10,6 +10,7 @@ import { MealCards } from "@/components/MealCards";
 import { MealDetail } from "@/components/MealDetail";
 import { CookingMode } from "@/components/CookingMode";
 import { GroceryList } from "@/components/GroceryList";
+import { DEMO_MEALS } from "@/lib/demo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -190,6 +191,19 @@ function PantryApp() {
     });
   };
 
+  /** Demo: jump straight into a fully populated meal plan so designers
+   *  can preview the plan/detail/grocery/cooking screens. */
+  const loadDemo = (target: AppState = "plan") => {
+    stopSpeaking();
+    setError(null);
+    setBudget("$30");
+    setRawRequest("$30 for the week, mostly vegetarian, easy weeknight meals");
+    setMeals(DEMO_MEALS);
+    setSelected(DEMO_MEALS[0]);
+    setHaveSet(new Set(["Olive oil", "Garlic", "Yellow onion"]));
+    setState(target);
+  };
+
   const showHero =
     state === "idle" || state === "listening" || state === "thinking" || state === "confirming";
 
@@ -214,7 +228,31 @@ function PantryApp() {
             transition={{ duration: 0.6 }}
             className="relative mx-auto flex min-h-[92vh] max-w-6xl flex-col items-center justify-center px-6"
           >
-            <FoodCollage blurred={state === "listening" || state === "thinking" || state === "confirming"} />
+            <FoodCollage
+              blurred={state === "listening" || state === "confirming"}
+              generating={state === "thinking"}
+            />
+
+            {/* Ambient warm-light pulse — responds to the conversation */}
+            <AnimatePresence>
+              {(state === "listening" || state === "thinking" || state === "confirming") && (
+                <motion.div
+                  key="ambient"
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: state === "thinking" ? [0.55, 0.85, 0.55] : [0.35, 0.6, 0.35],
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      "radial-gradient(60% 50% at 50% 55%, color-mix(in oklab, var(--amber-glow) 55%, transparent), transparent 70%)",
+                  }}
+                  aria-hidden
+                />
+              )}
+            </AnimatePresence>
 
             <div className="relative z-10 flex flex-col items-center text-center">
               <p className="eyebrow mb-4">A voice-led cookbook</p>
@@ -340,51 +378,68 @@ function PantryApp() {
               )}
 
               {state !== "confirming" && (
-                <button
-                  onClick={() => setShowText((v) => !v)}
-                  className="mt-6 inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] hover:text-foreground"
-                  style={{ color: "var(--ink-soft)" }}
-                >
-                  <Keyboard className="h-3.5 w-3.5" />
-                  {showText ? "Hide keyboard" : "Or type instead"}
-                </button>
+                <div className="mt-6 flex items-center gap-5">
+                  <button
+                    onClick={() => setShowText((v) => !v)}
+                    className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] hover:text-foreground"
+                    style={{ color: "var(--ink-soft)" }}
+                  >
+                    <Keyboard className="h-3.5 w-3.5" />
+                    {showText ? "Hide keyboard" : "Or type instead"}
+                  </button>
+                  <span className="h-3 w-px" style={{ background: "color-mix(in oklab, var(--ink) 18%, transparent)" }} />
+                  <button
+                    onClick={() => loadDemo("plan")}
+                    className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] hover:text-foreground"
+                    style={{ color: "var(--tomato)" }}
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    See a sample plan
+                  </button>
+                </div>
               )}
 
-              <AnimatePresence>
-                {showText && state !== "confirming" && (
-                  <motion.form
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      submitText();
-                    }}
-                    className="mt-4 flex w-full max-w-xl items-center gap-2 rounded-full border px-4 py-2"
-                    style={{
-                      borderColor: "color-mix(in oklab, var(--ink) 14%, transparent)",
-                      background: "color-mix(in oklab, var(--card) 95%, transparent)",
-                    }}
-                  >
-                    <input
-                      autoFocus
-                      value={textInput}
-                      onChange={(e) => setTextInput(e.target.value)}
-                      placeholder="$30 for dinner this week, vegetarian, easy…"
-                      className="flex-1 bg-transparent px-2 py-2 text-sm outline-none"
-                      style={{ color: "var(--ink)" }}
-                    />
-                    <button
-                      type="submit"
-                      className="grid h-9 w-9 place-items-center rounded-full"
-                      style={{ background: "var(--tomato)", color: "var(--primary-foreground)" }}
-                      aria-label="Send"
+              {/* Reserved slot — keyboard floats in/out without pushing layout */}
+              <div className="relative mt-4 h-14 w-full max-w-xl">
+                <AnimatePresence>
+                  {showText && state !== "confirming" && (
+                    <motion.form
+                      key="kbd"
+                      initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                      transition={{ duration: 0.45, ease: [0.22, 0.9, 0.3, 1] }}
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        submitText();
+                      }}
+                      className="absolute inset-x-0 top-0 flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-md"
+                      style={{
+                        borderColor: "color-mix(in oklab, var(--ink) 14%, transparent)",
+                        background: "color-mix(in oklab, var(--card) 95%, transparent)",
+                        boxShadow: "0 18px 40px -22px rgba(60,40,20,0.32)",
+                      }}
                     >
-                      <Send className="h-4 w-4" />
-                    </button>
-                  </motion.form>
-                )}
-              </AnimatePresence>
+                      <input
+                        autoFocus
+                        value={textInput}
+                        onChange={(e) => setTextInput(e.target.value)}
+                        placeholder="$30 for dinner this week, vegetarian, easy…"
+                        className="flex-1 bg-transparent px-2 py-2 text-sm outline-none"
+                        style={{ color: "var(--ink)" }}
+                      />
+                      <button
+                        type="submit"
+                        className="grid h-9 w-9 place-items-center rounded-full"
+                        style={{ background: "var(--tomato)", color: "var(--primary-foreground)" }}
+                        aria-label="Send"
+                      >
+                        <Send className="h-4 w-4" />
+                      </button>
+                    </motion.form>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Editorial footer rule */}

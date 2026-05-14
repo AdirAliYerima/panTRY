@@ -11,11 +11,17 @@ export function VoiceOrb({
 }) {
   const isListening = state === "listening";
   const isThinking = state === "thinking";
+  const isConfirming = state === "confirming";
+
+  // Orb breathes outward as the conversation gets more active.
+  const scale = isThinking ? 1.18 : isListening ? 1.1 : isConfirming ? 1.04 : 1;
 
   return (
-    <button
+    <motion.button
       onClick={onClick}
       aria-label={isListening ? "Stop listening" : "Start listening"}
+      animate={{ scale }}
+      transition={{ duration: 0.9, ease: [0.22, 0.9, 0.3, 1] }}
       className="group relative grid h-44 w-44 place-items-center rounded-full focus:outline-none"
     >
       {/* Outer ripples when listening */}
@@ -65,7 +71,7 @@ export function VoiceOrb({
           <Mic className="h-10 w-10" style={{ color: "var(--forest-deep)" }} strokeWidth={2.4} />
         )}
       </motion.span>
-    </button>
+    </motion.button>
   );
 }
 
