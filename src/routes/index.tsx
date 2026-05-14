@@ -378,51 +378,68 @@ function PantryApp() {
               )}
 
               {state !== "confirming" && (
-                <button
-                  onClick={() => setShowText((v) => !v)}
-                  className="mt-6 inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] hover:text-foreground"
-                  style={{ color: "var(--ink-soft)" }}
-                >
-                  <Keyboard className="h-3.5 w-3.5" />
-                  {showText ? "Hide keyboard" : "Or type instead"}
-                </button>
+                <div className="mt-6 flex items-center gap-5">
+                  <button
+                    onClick={() => setShowText((v) => !v)}
+                    className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] hover:text-foreground"
+                    style={{ color: "var(--ink-soft)" }}
+                  >
+                    <Keyboard className="h-3.5 w-3.5" />
+                    {showText ? "Hide keyboard" : "Or type instead"}
+                  </button>
+                  <span className="h-3 w-px" style={{ background: "color-mix(in oklab, var(--ink) 18%, transparent)" }} />
+                  <button
+                    onClick={() => loadDemo("plan")}
+                    className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] hover:text-foreground"
+                    style={{ color: "var(--tomato)" }}
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    See a sample plan
+                  </button>
+                </div>
               )}
 
-              <AnimatePresence>
-                {showText && state !== "confirming" && (
-                  <motion.form
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      submitText();
-                    }}
-                    className="mt-4 flex w-full max-w-xl items-center gap-2 rounded-full border px-4 py-2"
-                    style={{
-                      borderColor: "color-mix(in oklab, var(--ink) 14%, transparent)",
-                      background: "color-mix(in oklab, var(--card) 95%, transparent)",
-                    }}
-                  >
-                    <input
-                      autoFocus
-                      value={textInput}
-                      onChange={(e) => setTextInput(e.target.value)}
-                      placeholder="$30 for dinner this week, vegetarian, easy…"
-                      className="flex-1 bg-transparent px-2 py-2 text-sm outline-none"
-                      style={{ color: "var(--ink)" }}
-                    />
-                    <button
-                      type="submit"
-                      className="grid h-9 w-9 place-items-center rounded-full"
-                      style={{ background: "var(--tomato)", color: "var(--primary-foreground)" }}
-                      aria-label="Send"
+              {/* Reserved slot — keyboard floats in/out without pushing layout */}
+              <div className="relative mt-4 h-14 w-full max-w-xl">
+                <AnimatePresence>
+                  {showText && state !== "confirming" && (
+                    <motion.form
+                      key="kbd"
+                      initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                      transition={{ duration: 0.45, ease: [0.22, 0.9, 0.3, 1] }}
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        submitText();
+                      }}
+                      className="absolute inset-x-0 top-0 flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-md"
+                      style={{
+                        borderColor: "color-mix(in oklab, var(--ink) 14%, transparent)",
+                        background: "color-mix(in oklab, var(--card) 95%, transparent)",
+                        boxShadow: "0 18px 40px -22px rgba(60,40,20,0.32)",
+                      }}
                     >
-                      <Send className="h-4 w-4" />
-                    </button>
-                  </motion.form>
-                )}
-              </AnimatePresence>
+                      <input
+                        autoFocus
+                        value={textInput}
+                        onChange={(e) => setTextInput(e.target.value)}
+                        placeholder="$30 for dinner this week, vegetarian, easy…"
+                        className="flex-1 bg-transparent px-2 py-2 text-sm outline-none"
+                        style={{ color: "var(--ink)" }}
+                      />
+                      <button
+                        type="submit"
+                        className="grid h-9 w-9 place-items-center rounded-full"
+                        style={{ background: "var(--tomato)", color: "var(--primary-foreground)" }}
+                        aria-label="Send"
+                      >
+                        <Send className="h-4 w-4" />
+                      </button>
+                    </motion.form>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Editorial footer rule */}
