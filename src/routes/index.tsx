@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { Keyboard, Send } from "lucide-react";
+import { Keyboard, Send, Check, X, Mic } from "lucide-react";
 import type { AppState, Meal } from "@/lib/types";
 import { getRecognition, speak, stopSpeaking } from "@/lib/speech";
 import { FoodCollage } from "@/components/FoodCollage";
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/")({
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
   }),
@@ -41,6 +41,7 @@ export const Route = createFileRoute("/")({
 const STATUS: Record<AppState, string> = {
   idle: "Tap to start",
   listening: "Listening…",
+  confirming: "Did I get that right?",
   thinking: "Building your meal plan…",
   plan: "Pick a meal to dive in",
   detail: "Ready when you are",
@@ -48,9 +49,24 @@ const STATUS: Record<AppState, string> = {
   cooking: "Cooking together",
 };
 
+/** Parse a dollar budget from natural speech. Returns formatted "$30" or null. */
+function parseBudget(s: string): string | null {
+  const cleaned = s.toLowerCase().replace(/,/g, "");
+  const m = cleaned.match(/\$?\s*(\d{1,5})(?:\s*(?:dollars|bucks|usd))?/);
+  if (m) return `$${m[1]}`;
+  const words: Record<string, number> = {
+    ten: 10, fifteen: 15, twenty: 20, thirty: 30, forty: 40, fifty: 50,
+    sixty: 60, seventy: 70, eighty: 80, ninety: 90, hundred: 100,
+  };
+  for (const k of Object.keys(words)) if (cleaned.includes(k)) return `$${words[k]}`;
+  return null;
+}
+
 function PantryApp() {
   const [state, setState] = useState<AppState>("idle");
   const [transcript, setTranscript] = useState("");
+  const [budget, setBudget] = useState<string | null>(null);
+  const [rawRequest, setRawRequest] = useState("");
   const [meals, setMeals] = useState<Meal[]>([]);
   const [selected, setSelected] = useState<Meal | null>(null);
   const [haveSet, setHaveSet] = useState<Set<string>>(new Set());
@@ -65,16 +81,13 @@ function PantryApp() {
 
   const generateMeals = async (utterance: string) => {
     setState("thinking");
-    speak("Let me put together a few options for you.");
+    speak("Perfect. Let me put together a few options for you.");
     setError(null);
     try {
       const res = await fetch("/api/meals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          budget: utterance,
-          preferences: utterance,
-        }),
+        body: JSON.stringify({ budget: utterance, preferences: utterance }),
       });
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
@@ -94,7 +107,16 @@ function PantryApp() {
     }
   };
 
-  const startListening = () => {
+  /** After we capture the user's request, repeat the budget back and ask to confirm. */
+  const askConfirm = (utterance: string) => {
+    const b = parseBudget(utterance) ?? "$30";
+    setBudget(b);
+    setRawRequest(utterance);
+    setState("confirming");
+    speak(`Just to confirm — your budget is ${b}. Does that sound right?`);
+  };
+
+  const startListening = (mode: "intake" | "confirm" = "intake") => {
     setError(null);
     const rec = recRef.current;
     if (!rec) {
@@ -120,21 +142,34 @@ function PantryApp() {
     };
     rec.onend = () => {
       const text = (final || transcript).trim();
-      if (text.length > 0) {
-        generateMeals(text);
+      if (!text) {
+        setState(mode === "confirm" ? "confirming" : "idle");
+        return;
+      }
+      if (mode === "confirm") {
+        const lower = text.toLowerCase();
+        if (/(yes|yeah|yep|yup|correct|right|sure|confirm)/.test(lower)) {
+          generateMeals(rawRequest || text);
+        } else if (/(no|nope|wrong|change)/.test(lower)) {
+          setState("idle");
+          speak("Okay, tell me your budget again.");
+        } else {
+          // Treat any new utterance as a fresh budget
+          askConfirm(text);
+        }
       } else {
-        setState("idle");
+        askConfirm(text);
       }
     };
     rec.onerror = () => {
-      setState("idle");
+      setState(mode === "confirm" ? "confirming" : "idle");
       setError("Microphone unavailable. Try typing instead.");
       setShowText(true);
     };
     try {
       rec.start();
     } catch {
-      setState("idle");
+      setState(mode === "confirm" ? "confirming" : "idle");
     }
   };
 
@@ -144,7 +179,7 @@ function PantryApp() {
     setTextInput("");
     setShowText(false);
     setTranscript(t);
-    generateMeals(t);
+    askConfirm(t);
   };
 
   const toggleHave = (name: string) => {
@@ -155,10 +190,20 @@ function PantryApp() {
     });
   };
 
-  const showHero = state === "idle" || state === "listening" || state === "thinking";
+  const showHero =
+    state === "idle" || state === "listening" || state === "thinking" || state === "confirming";
 
   return (
     <main className="relative z-10 min-h-screen overflow-hidden">
+      {/* Top editorial bar */}
+      <div className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-6 pt-6 text-xs uppercase tracking-[0.28em]">
+        <span className="font-semibold" style={{ color: "var(--tomato)" }}>Pantry — Issue 01</span>
+        <span className="hidden sm:inline" style={{ color: "var(--ink-soft)" }}>
+          Voice · Plan · Cook
+        </span>
+        <span style={{ color: "var(--ink-soft)" }}>Spring '26</span>
+      </div>
+
       {/* HERO */}
       <AnimatePresence>
         {showHero && (
@@ -167,36 +212,112 @@ function PantryApp() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, y: -40 }}
             transition={{ duration: 0.6 }}
-            className="relative mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center px-6"
+            className="relative mx-auto flex min-h-[92vh] max-w-6xl flex-col items-center justify-center px-6"
           >
-            <FoodCollage blurred={state === "listening" || state === "thinking"} />
+            <FoodCollage blurred={state === "listening" || state === "thinking" || state === "confirming"} />
 
             <div className="relative z-10 flex flex-col items-center text-center">
+              <p className="eyebrow mb-4">A voice-led cookbook</p>
               <motion.h1
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
-                className="font-display text-7xl leading-none tracking-tight md:text-8xl"
-                style={{ color: "var(--cream)" }}
+                className="font-display text-[clamp(4rem,12vw,9rem)] leading-[0.92] tracking-tight"
+                style={{ color: "var(--ink)", fontWeight: 500 }}
               >
-                Pantry
+                Pant<span style={{ color: "var(--tomato)", fontStyle: "italic" }}>ry</span>.
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15, duration: 0.7 }}
-                className="mt-3 max-w-md text-base text-muted-foreground md:text-lg"
+                className="mt-4 max-w-md text-base md:text-lg"
+                style={{ color: "var(--ink-soft)" }}
               >
-                Tell me your budget. I'll handle dinner.
+                Tell me your budget. I'll handle dinner — start to plate.
               </motion.p>
 
-              <div className="my-12">
-                <VoiceOrb state={state} onClick={startListening} />
-              </div>
+              {/* Confirming step */}
+              <AnimatePresence mode="wait">
+                {state === "confirming" ? (
+                  <motion.div
+                    key="confirm"
+                    initial={{ opacity: 0, y: 24, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -16 }}
+                    transition={{ duration: 0.5, ease: [0.22, 0.9, 0.3, 1] }}
+                    className="glass mt-10 w-full max-w-xl rounded-3xl px-8 py-8"
+                    style={{ boxShadow: "var(--shadow-card)" }}
+                  >
+                    <p className="eyebrow">Confirm budget</p>
+                    <p
+                      className="mt-3 font-display text-3xl leading-snug md:text-4xl"
+                      style={{ color: "var(--ink)" }}
+                    >
+                      Your budget is{" "}
+                      <span style={{ color: "var(--tomato)", fontStyle: "italic" }}>
+                        {budget}
+                      </span>
+                      . Does that sound right?
+                    </p>
+                    <p className="mt-2 text-sm" style={{ color: "var(--ink-soft)" }}>
+                      "{rawRequest}"
+                    </p>
 
-              <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
-                {STATUS[state]}
-              </p>
+                    <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+                      <button
+                        onClick={() => generateMeals(rawRequest || budget || "")}
+                        className="group inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm font-medium tracking-wide transition-all hover:scale-[1.02]"
+                        style={{
+                          background: "var(--tomato)",
+                          color: "var(--primary-foreground)",
+                          boxShadow: "0 14px 30px -12px color-mix(in oklab, var(--tomato) 70%, transparent)",
+                        }}
+                      >
+                        <Check className="h-4 w-4" /> Yes, that's right
+                      </button>
+                      <button
+                        onClick={() => {
+                          setState("idle");
+                          speak("Okay, tell me your budget again.");
+                        }}
+                        className="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm font-medium hover:bg-card"
+                        style={{ borderColor: "color-mix(in oklab, var(--ink) 18%, transparent)", color: "var(--ink)" }}
+                      >
+                        <X className="h-4 w-4" /> No, change it
+                      </button>
+                      <button
+                        onClick={() => startListening("confirm")}
+                        aria-label="Reply by voice"
+                        className="grid h-11 w-11 place-items-center rounded-full border hover:bg-card"
+                        style={{ borderColor: "color-mix(in oklab, var(--ink) 18%, transparent)", color: "var(--ink)" }}
+                      >
+                        <Mic className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <p className="mt-5 text-[11px] uppercase tracking-[0.24em]" style={{ color: "var(--ink-soft)" }}>
+                      Say "yes" or "no" — I'm listening.
+                    </p>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="orb"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="my-12"
+                  >
+                    <VoiceOrb state={state} onClick={() => startListening("intake")} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {state !== "confirming" && (
+                <p className="text-xs uppercase tracking-[0.28em]" style={{ color: "var(--ink-soft)" }}>
+                  {STATUS[state]}
+                </p>
+              )}
 
               <AnimatePresence>
                 {transcript && (state === "listening" || state === "thinking") && (
@@ -205,7 +326,7 @@ function PantryApp() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     className="mt-4 max-w-xl font-display text-xl italic"
-                    style={{ color: "var(--cream)" }}
+                    style={{ color: "var(--ink)" }}
                   >
                     "{transcript}"
                   </motion.p>
@@ -213,21 +334,24 @@ function PantryApp() {
               </AnimatePresence>
 
               {error && (
-                <p className="mt-4 max-w-md text-sm" style={{ color: "#f3a878" }}>
+                <p className="mt-4 max-w-md text-sm" style={{ color: "var(--tomato)" }}>
                   {error}
                 </p>
               )}
 
-              <button
-                onClick={() => setShowText((v) => !v)}
-                className="mt-6 inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
-              >
-                <Keyboard className="h-3.5 w-3.5" />
-                {showText ? "Hide keyboard" : "Or type instead"}
-              </button>
+              {state !== "confirming" && (
+                <button
+                  onClick={() => setShowText((v) => !v)}
+                  className="mt-6 inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] hover:text-foreground"
+                  style={{ color: "var(--ink-soft)" }}
+                >
+                  <Keyboard className="h-3.5 w-3.5" />
+                  {showText ? "Hide keyboard" : "Or type instead"}
+                </button>
+              )}
 
               <AnimatePresence>
-                {showText && (
+                {showText && state !== "confirming" && (
                   <motion.form
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
@@ -236,19 +360,24 @@ function PantryApp() {
                       e.preventDefault();
                       submitText();
                     }}
-                    className="mt-4 flex w-full max-w-xl items-center gap-2 rounded-full border border-border bg-card/70 px-4 py-2 backdrop-blur"
+                    className="mt-4 flex w-full max-w-xl items-center gap-2 rounded-full border px-4 py-2"
+                    style={{
+                      borderColor: "color-mix(in oklab, var(--ink) 14%, transparent)",
+                      background: "color-mix(in oklab, var(--card) 95%, transparent)",
+                    }}
                   >
                     <input
                       autoFocus
                       value={textInput}
                       onChange={(e) => setTextInput(e.target.value)}
                       placeholder="$30 for dinner this week, vegetarian, easy…"
-                      className="flex-1 bg-transparent px-2 py-2 text-sm outline-none placeholder:text-muted-foreground"
+                      className="flex-1 bg-transparent px-2 py-2 text-sm outline-none"
+                      style={{ color: "var(--ink)" }}
                     />
                     <button
                       type="submit"
                       className="grid h-9 w-9 place-items-center rounded-full"
-                      style={{ background: "var(--amber)", color: "var(--forest-deep)" }}
+                      style={{ background: "var(--tomato)", color: "var(--primary-foreground)" }}
                       aria-label="Send"
                     >
                       <Send className="h-4 w-4" />
@@ -256,6 +385,16 @@ function PantryApp() {
                   </motion.form>
                 )}
               </AnimatePresence>
+            </div>
+
+            {/* Editorial footer rule */}
+            <div className="absolute inset-x-0 bottom-6 mx-auto max-w-6xl px-6">
+              <div className="editorial-rule" />
+              <div className="mt-3 flex items-center justify-between text-[10px] uppercase tracking-[0.28em]"
+                   style={{ color: "var(--ink-soft)" }}>
+                <span>No. 001 · Hands-free</span>
+                <span>Eat well. Spend less.</span>
+              </div>
             </div>
           </motion.section>
         )}
@@ -280,6 +419,8 @@ function PantryApp() {
                 setMeals([]);
                 setSelected(null);
                 setHaveSet(new Set());
+                setBudget(null);
+                setRawRequest("");
                 setState("idle");
               }}
             />
@@ -363,19 +504,21 @@ function Header({
     <div className="mx-auto max-w-6xl px-6">
       <div className="flex items-end justify-between gap-6">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em]" style={{ color: "var(--amber)" }}>
-            {eyebrow}
-          </p>
-          <h2 className="mt-2 font-display text-5xl leading-none md:text-6xl">{title}</h2>
-          <p className="mt-3 max-w-xl text-muted-foreground">{subtitle}</p>
+          <p className="eyebrow">{eyebrow}</p>
+          <h2 className="mt-2 font-display text-5xl leading-none md:text-6xl" style={{ color: "var(--ink)" }}>
+            {title}
+          </h2>
+          <p className="mt-3 max-w-xl" style={{ color: "var(--ink-soft)" }}>{subtitle}</p>
         </div>
         <button
           onClick={onReset}
-          className="hidden shrink-0 rounded-full border border-border bg-card/60 px-4 py-2 text-sm hover:border-amber/60 sm:inline-flex"
+          className="hidden shrink-0 rounded-full border px-4 py-2 text-sm hover:bg-card sm:inline-flex"
+          style={{ borderColor: "color-mix(in oklab, var(--ink) 18%, transparent)", color: "var(--ink)" }}
         >
           Start over
         </button>
       </div>
+      <div className="editorial-rule mt-6" />
     </div>
   );
 }
