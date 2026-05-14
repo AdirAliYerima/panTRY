@@ -50,7 +50,7 @@ export function MealCards({
               alt={meal.name}
               loading="lazy"
               className="h-32 w-32 object-contain transition-transform duration-500 group-hover:scale-110"
-              style={{ filter: "drop-shadow(0 18px 22px rgba(0,0,0,0.5))" }}
+              style={{ filter: "drop-shadow(0 16px 20px rgba(120,70,30,0.22))" }}
             />
           </div>
           <p className="text-xs uppercase tracking-[0.18em] text-amber" style={{ color: "var(--amber)" }}>
