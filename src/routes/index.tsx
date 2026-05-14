@@ -514,47 +514,7 @@ function PantryApp() {
                 </div>
               )}
 
-              {/* Reserved slot — keyboard floats in/out without pushing layout */}
-              <div className="relative mt-4 h-14 w-full max-w-xl">
-                <AnimatePresence>
-                  {showText && state !== "confirming" && (
-                    <motion.form
-                      key="kbd"
-                      initial={{ opacity: 0, y: -8, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                      transition={{ duration: 0.45, ease: [0.22, 0.9, 0.3, 1] }}
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        submitText();
-                      }}
-                      className="absolute inset-x-0 top-0 flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-md"
-                      style={{
-                        borderColor: "color-mix(in oklab, var(--ink) 14%, transparent)",
-                        background: "color-mix(in oklab, var(--card) 95%, transparent)",
-                        boxShadow: "0 18px 40px -22px rgba(60,40,20,0.32)",
-                      }}
-                    >
-                      <input
-                        autoFocus
-                        value={textInput}
-                        onChange={(e) => setTextInput(e.target.value)}
-                        placeholder="$30 for dinner this week, vegetarian, easy…"
-                        className="flex-1 bg-transparent px-2 py-2 text-sm outline-none"
-                        style={{ color: "var(--ink)" }}
-                      />
-                      <button
-                        type="submit"
-                        className="grid h-9 w-9 place-items-center rounded-full"
-                        style={{ background: "var(--tomato)", color: "var(--primary-foreground)" }}
-                        aria-label="Send"
-                      >
-                        <Send className="h-4 w-4" />
-                      </button>
-                    </motion.form>
-                  )}
-                </AnimatePresence>
-              </div>
+              {/* Keyboard is rendered as a centered overlay outside this column. */}
             </div>
 
             {/* Editorial footer rule */}
