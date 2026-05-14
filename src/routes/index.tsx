@@ -78,7 +78,19 @@ function PantryApp() {
   const [error, setError] = useState<string | null>(null);
   const [showText, setShowText] = useState(false);
   const [textInput, setTextInput] = useState("");
+  const [narrationIndex, setNarrationIndex] = useState<number | null>(null);
+  const [narrationLine, setNarrationLine] = useState<string>("");
+  const [checkIndex, setCheckIndex] = useState(0);
   const recRef = useRef<ReturnType<typeof getRecognition>>(null);
+  const narrationTimers = useRef<number[]>([]);
+
+  const clearNarration = () => {
+    narrationTimers.current.forEach((id) => window.clearTimeout(id));
+    narrationTimers.current = [];
+    stopSpeaking();
+    setNarrationIndex(null);
+    setNarrationLine("");
+  };
 
   useEffect(() => {
     recRef.current = getRecognition();
