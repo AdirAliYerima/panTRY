@@ -215,7 +215,31 @@ function PantryApp() {
             transition={{ duration: 0.6 }}
             className="relative mx-auto flex min-h-[92vh] max-w-6xl flex-col items-center justify-center px-6"
           >
-            <FoodCollage blurred={state === "listening" || state === "thinking" || state === "confirming"} />
+            <FoodCollage
+              blurred={state === "listening" || state === "confirming"}
+              generating={state === "thinking"}
+            />
+
+            {/* Ambient warm-light pulse — responds to the conversation */}
+            <AnimatePresence>
+              {(state === "listening" || state === "thinking" || state === "confirming") && (
+                <motion.div
+                  key="ambient"
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: state === "thinking" ? [0.55, 0.85, 0.55] : [0.35, 0.6, 0.35],
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      "radial-gradient(60% 50% at 50% 55%, color-mix(in oklab, var(--amber-glow) 55%, transparent), transparent 70%)",
+                  }}
+                  aria-hidden
+                />
+              )}
+            </AnimatePresence>
 
             <div className="relative z-10 flex flex-col items-center text-center">
               <p className="eyebrow mb-4">A voice-led cookbook</p>
