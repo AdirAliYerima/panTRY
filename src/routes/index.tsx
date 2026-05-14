@@ -543,25 +543,62 @@ function PantryApp() {
           >
             <Header
               eyebrow="Your meal plan"
-              title="Four ideas, on budget"
-              subtitle="Tap any meal to see ingredients, costs, and step-by-step cooking."
-              onReset={() => {
-                setMeals([]);
-                setSelected(null);
-                setHaveSet(new Set());
-                setBudget(null);
-                setRawRequest("");
-                setState("idle");
-              }}
+              title="Three meals, on budget"
+              subtitle="I'll talk you through each one — tap whichever sounds best."
+              onReset={resetAll}
             />
-            <div className="mt-10">
-              <MealCards meals={meals} onSelect={(m) => { setSelected(m); setState("detail"); }} />
+            <div className="mt-12">
+              <MealCards meals={meals} onSelect={pickMeal} activeIndex={narrationIndex} />
             </div>
           </motion.section>
         )}
       </AnimatePresence>
 
-      {/* DETAIL */}
+      {/* REVIEWING */}
+      <AnimatePresence>
+        {state === "reviewing" && selected && (
+          <motion.section
+            key="reviewing"
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -60 }}
+            transition={{ duration: 0.5 }}
+            className="relative min-h-screen py-16"
+          >
+            <MealReview
+              meal={selected}
+              onBack={() => { clearNarration(); setState("plan"); }}
+              onConfirm={startChecking}
+              onDecline={() => { clearNarration(); setState("plan"); }}
+            />
+          </motion.section>
+        )}
+      </AnimatePresence>
+
+      {/* CHECKING ingredients */}
+      <AnimatePresence>
+        {state === "checking" && selected && (
+          <motion.section
+            key="checking"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.5 }}
+            className="relative min-h-screen py-16"
+          >
+            <IngredientChecklist
+              meal={selected}
+              index={checkIndex}
+              haveSet={haveSet}
+              onAnswer={answerIngredient}
+              onBack={() => { clearNarration(); setState("reviewing"); }}
+              onFinish={finishChecking}
+            />
+          </motion.section>
+        )}
+      </AnimatePresence>
+
+      {/* DETAIL (legacy, used outside demo flow) */}
       <AnimatePresence>
         {state === "detail" && selected && (
           <motion.section
@@ -595,7 +632,24 @@ function PantryApp() {
             transition={{ duration: 0.4 }}
             className="relative min-h-screen py-16"
           >
-            <GroceryList meal={selected} haveSet={haveSet} onBack={() => setState("detail")} />
+            <GroceryList
+              meal={selected}
+              haveSet={haveSet}
+              onBack={() => setState("checking")}
+            />
+            <div className="mx-auto mt-8 flex max-w-3xl justify-end px-6">
+              <button
+                onClick={() => setState("cooking")}
+                className="inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm font-medium tracking-wide hover:scale-[1.03] transition-transform"
+                style={{
+                  background: "var(--tomato)",
+                  color: "var(--primary-foreground)",
+                  boxShadow: "0 14px 30px -12px color-mix(in oklab, var(--tomato) 70%, transparent)",
+                }}
+              >
+                Start cooking →
+              </button>
+            </div>
           </motion.section>
         )}
       </AnimatePresence>
@@ -611,8 +665,94 @@ function PantryApp() {
             transition={{ duration: 0.4 }}
             className="relative min-h-screen py-16"
           >
-            <CookingMode meal={selected} onExit={() => setState("detail")} />
+            <CookingMode meal={selected} onExit={() => setState("reviewing")} />
           </motion.section>
+        )}
+      </AnimatePresence>
+
+      {/* Narration caption — appears wherever the assistant is speaking */}
+      <AnimatePresence>
+        {narrationLine && (state === "plan" || state === "reviewing" || state === "checking") && (
+          <motion.div
+            key={narrationLine}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.4 }}
+            className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex justify-center px-6"
+          >
+            <div
+              className="glass max-w-xl rounded-full px-6 py-3 text-center text-sm backdrop-blur-md"
+              style={{
+                background: "color-mix(in oklab, var(--ink) 88%, transparent)",
+                color: "var(--cream)",
+                boxShadow: "0 18px 40px -22px rgba(0,0,0,0.4)",
+              }}
+            >
+              <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: "var(--tomato)" }} />
+              {narrationLine}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Centered keyboard overlay */}
+      <AnimatePresence>
+        {showText && state !== "confirming" && (
+          <motion.div
+            key="kbd-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-40 grid place-items-center px-4"
+            style={{ background: "color-mix(in oklab, var(--ink) 35%, transparent)", backdropFilter: "blur(8px)" }}
+            onClick={() => setShowText(false)}
+          >
+            <motion.form
+              key="kbd-form"
+              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.96 }}
+              transition={{ duration: 0.45, ease: [0.22, 0.9, 0.3, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              onSubmit={(e) => { e.preventDefault(); submitText(); }}
+              className="w-full max-w-xl rounded-3xl border p-6 shadow-2xl"
+              style={{
+                borderColor: "color-mix(in oklab, var(--ink) 12%, transparent)",
+                background: "var(--card)",
+              }}
+            >
+              <p className="eyebrow mb-3" style={{ color: "var(--tomato)" }}>Type your request</p>
+              <div className="flex items-center gap-3 rounded-2xl border px-4 py-3"
+                   style={{ borderColor: "color-mix(in oklab, var(--ink) 14%, transparent)" }}>
+                <input
+                  autoFocus
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  placeholder="$30 for dinner this week, vegetarian, easy…"
+                  className="flex-1 bg-transparent text-base outline-none"
+                  style={{ color: "var(--ink)" }}
+                />
+                <button
+                  type="submit"
+                  className="grid h-10 w-10 place-items-center rounded-full transition-transform hover:scale-105"
+                  style={{ background: "var(--tomato)", color: "var(--primary-foreground)" }}
+                  aria-label="Send"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowText(false)}
+                className="mt-4 text-xs uppercase tracking-[0.24em]"
+                style={{ color: "var(--ink-soft)" }}
+              >
+                Close
+              </button>
+            </motion.form>
+          </motion.div>
         )}
       </AnimatePresence>
     </main>
