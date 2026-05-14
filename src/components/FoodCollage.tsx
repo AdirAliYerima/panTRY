@@ -49,7 +49,7 @@ export function FoodCollage({ blurred }: { blurred?: boolean }) {
                 width: it.size,
                 height: it.size,
                 filter:
-                  "drop-shadow(0 30px 40px rgba(0,0,0,0.55)) drop-shadow(0 0 30px rgba(212,168,83,0.18))",
+                  "drop-shadow(0 22px 28px rgba(120, 70, 30, 0.22)) drop-shadow(0 0 26px rgba(220, 130, 70, 0.12))",
               } as React.CSSProperties
             }
           >
