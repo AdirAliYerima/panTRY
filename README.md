@@ -2,6 +2,10 @@
 
 panTRY is a voice-powered meal planning app. It helps you describe a meal request and budget, generates three meal options, provides an ingredient and grocery list, and guides you through cooking step by step.
 
+## App Architecture
+
+![panTRY app architecture](docs/image.png)
+
 ## Features
 
 - Voice-based meal requests and confirmation
