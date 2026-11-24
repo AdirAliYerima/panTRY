@@ -21,6 +21,12 @@ export const DEMO_MEALS: Meal[] = [
       { name: "Crusty sourdough", quantity: "½ loaf", estimatedCost: "$1.80", category: "Pantry" },
     ],
     nutrition: { calories: 380, proteinG: 16, carbsG: 52, fatG: 11 },
+    heroIngredient: "Cannellini beans",
+    nutritionFacts: [
+      "Cannellini beans: 14g plant protein per cup",
+      "Kale brings vitamins K, A & C in one leaf",
+      "Olive oil — heart-healthy monounsaturated fats",
+    ],
     steps: [
       { instruction: "Warm olive oil in a heavy pot. Add diced onion and a pinch of salt; cook until translucent.", timerMinutes: 6 },
       { instruction: "Stir in minced garlic and a few grinds of black pepper. Cook just until fragrant — don't let it brown.", timerMinutes: 1 },
@@ -47,6 +53,12 @@ export const DEMO_MEALS: Meal[] = [
       { name: "Olive oil", quantity: "¼ cup", estimatedCost: "$0.50", category: "Pantry" },
     ],
     nutrition: { calories: 520, proteinG: 18, carbsG: 78, fatG: 16 },
+    heroIngredient: "Spaghetti",
+    nutritionFacts: [
+      "Slow-release carbs — sustained energy",
+      "Lemon: vitamin C powerhouse, zero sugar",
+      "Parmesan packs calcium + umami",
+    ],
     steps: [
       { instruction: "Bring a large pot of well-salted water to a rolling boil.", timerMinutes: 8 },
       { instruction: "Cook spaghetti until just shy of al dente. Reserve a mug of pasta water before draining.", timerMinutes: 9 },
@@ -71,6 +83,12 @@ export const DEMO_MEALS: Meal[] = [
       { name: "Butter", quantity: "1 tbsp", estimatedCost: "$0.30", category: "Dairy" },
     ],
     nutrition: { calories: 310, proteinG: 22, carbsG: 8, fatG: 22 },
+    heroIngredient: "Eggs",
+    nutritionFacts: [
+      "Eggs: complete protein, all 9 essential amino acids",
+      "Tomatoes — lycopene & vitamin C",
+      "Feta: lower-fat cheese with calcium boost",
+    ],
     steps: [
       { instruction: "Preheat oven to 375°F. Whisk eggs with salt, pepper, and a splash of water until uniform.", timerMinutes: null },
       { instruction: "Melt butter in an oven-safe skillet. Soften the onion slowly until just sweet.", timerMinutes: 7 },
@@ -95,6 +113,12 @@ export const DEMO_MEALS: Meal[] = [
       { name: "Chili flakes", quantity: "Pinch", estimatedCost: "$0.10", category: "Pantry" },
     ],
     nutrition: { calories: 420, proteinG: 14, carbsG: 38, fatG: 24 },
+    heroIngredient: "Avocado",
+    nutritionFacts: [
+      "Avocado: heart-healthy monounsaturated fats",
+      "Sourdough — fermented, easier on the gut",
+      "Eggs deliver choline for brain health",
+    ],
     steps: [
       { instruction: "Toast the sourdough until deeply golden and crisp on the edges.", timerMinutes: 4 },
       { instruction: "Smash avocado with lemon juice and a generous pinch of flaky salt.", timerMinutes: null },

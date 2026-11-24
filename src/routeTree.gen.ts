@@ -10,11 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiSmsRouteImport } from './routes/api/sms'
 import { Route as ApiMealsRouteImport } from './routes/api/meals'
+import { Route as ApiLiveTokenRouteImport } from './routes/api/live-token'
+import { Route as ApiFoodRouteImport } from './routes/api/food'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSmsRoute = ApiSmsRouteImport.update({
+  id: '/api/sms',
+  path: '/api/sms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiMealsRoute = ApiMealsRouteImport.update({
@@ -22,31 +30,59 @@ const ApiMealsRoute = ApiMealsRouteImport.update({
   path: '/api/meals',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLiveTokenRoute = ApiLiveTokenRouteImport.update({
+  id: '/api/live-token',
+  path: '/api/live-token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiFoodRoute = ApiFoodRouteImport.update({
+  id: '/api/food',
+  path: '/api/food',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/food': typeof ApiFoodRoute
+  '/api/live-token': typeof ApiLiveTokenRoute
   '/api/meals': typeof ApiMealsRoute
+  '/api/sms': typeof ApiSmsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/food': typeof ApiFoodRoute
+  '/api/live-token': typeof ApiLiveTokenRoute
   '/api/meals': typeof ApiMealsRoute
+  '/api/sms': typeof ApiSmsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/food': typeof ApiFoodRoute
+  '/api/live-token': typeof ApiLiveTokenRoute
   '/api/meals': typeof ApiMealsRoute
+  '/api/sms': typeof ApiSmsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/meals'
+  fullPaths: '/' | '/api/food' | '/api/live-token' | '/api/meals' | '/api/sms'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/meals'
-  id: '__root__' | '/' | '/api/meals'
+  to: '/' | '/api/food' | '/api/live-token' | '/api/meals' | '/api/sms'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/food'
+    | '/api/live-token'
+    | '/api/meals'
+    | '/api/sms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiFoodRoute: typeof ApiFoodRoute
+  ApiLiveTokenRoute: typeof ApiLiveTokenRoute
   ApiMealsRoute: typeof ApiMealsRoute
+  ApiSmsRoute: typeof ApiSmsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +94,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/sms': {
+      id: '/api/sms'
+      path: '/api/sms'
+      fullPath: '/api/sms'
+      preLoaderRoute: typeof ApiSmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/meals': {
       id: '/api/meals'
       path: '/api/meals'
@@ -65,13 +108,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMealsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/live-token': {
+      id: '/api/live-token'
+      path: '/api/live-token'
+      fullPath: '/api/live-token'
+      preLoaderRoute: typeof ApiLiveTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/food': {
+      id: '/api/food'
+      path: '/api/food'
+      fullPath: '/api/food'
+      preLoaderRoute: typeof ApiFoodRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiFoodRoute: ApiFoodRoute,
+  ApiLiveTokenRoute: ApiLiveTokenRoute,
   ApiMealsRoute: ApiMealsRoute,
+  ApiSmsRoute: ApiSmsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

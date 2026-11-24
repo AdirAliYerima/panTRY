@@ -24,6 +24,12 @@ export type Meal = {
     carbsG: number;
     fatG: number;
   };
+  /** 2-3 short nutritional / ingredient facts shown on the meal card. */
+  nutritionFacts?: string[];
+  /** Hero ingredient used to drive card animation + fact lookup. */
+  heroIngredient?: string;
+  /** Short, descriptive food-photography prompt used to fetch a meal image. */
+  imagePrompt?: string;
   steps: Step[];
 };
 
