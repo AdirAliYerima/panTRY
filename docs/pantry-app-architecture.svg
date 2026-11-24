@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#FBF8F1"/>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2F5D50"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#3D4A42" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <text x="800" y="68" text-anchor="middle" font-size="42" font-weight="700" fill="#2F5D50">panTRY</text>
+    <text x="800" y="108" text-anchor="middle" font-size="21" fill="#69766F">Simple app architecture and user flow</text>
+
+    <!-- Column headers -->
+    <g text-anchor="middle" font-size="17" font-weight="700" fill="#69766F">
+      <text x="235" y="158">1. USER EXPERIENCE</text>
+      <text x="800" y="158">2. APP LOGIC</text>
+      <text x="1365" y="158">3. SERVER &amp; AI SERVICES</text>
+    </g>
+
+    <!-- Left: user experience -->
+    <g filter="url(#shadow)">
+      <rect x="75" y="185" width="320" height="690" rx="26" fill="#FFFFFF" stroke="#DDD7CA" stroke-width="2"/>
+    </g>
+    <rect x="105" y="215" width="260" height="82" rx="18" fill="#E7F0EA"/>
+    <text x="235" y="246" text-anchor="middle" font-size="19" font-weight="700" fill="#2F5D50">Browser</text>
+    <text x="235" y="276" text-anchor="middle" font-size="16" fill="#69766F">React + TanStack UI</text>
+
+    <g font-size="16">
+      <rect x="105" y="330" width="260" height="82" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="235" y="358" text-anchor="middle" font-weight="700" fill="#2F5D50">Ask for meals</text>
+      <text x="235" y="386" text-anchor="middle" fill="#69766F">Voice or visible controls</text>
+
+      <rect x="105" y="440" width="260" height="82" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="235" y="468" text-anchor="middle" font-weight="700" fill="#2F5D50">Choose a meal</text>
+      <text x="235" y="496" text-anchor="middle" fill="#69766F">Review ingredients and cost</text>
+
+      <rect x="105" y="550" width="260" height="82" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="235" y="578" text-anchor="middle" font-weight="700" fill="#2F5D50">Check the pantry</text>
+      <text x="235" y="606" text-anchor="middle" fill="#69766F">Mark what you already have</text>
+
+      <rect x="105" y="660" width="260" height="82" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="235" y="688" text-anchor="middle" font-weight="700" fill="#2F5D50">Cook with guidance</text>
+      <text x="235" y="716" text-anchor="middle" fill="#69766F">Steps, timers, and audio</text>
+
+      <rect x="105" y="770" width="260" height="82" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="235" y="798" text-anchor="middle" font-weight="700" fill="#2F5D50">Share the grocery list</text>
+      <text x="235" y="826" text-anchor="middle" fill="#69766F">Twilio or native SMS link</text>
+    </g>
+
+    <!-- Center: app logic -->
+    <g filter="url(#shadow)">
+      <rect x="510" y="185" width="580" height="690" rx="26" fill="#FFFFFF" stroke="#DDD7CA" stroke-width="2"/>
+    </g>
+
+    <rect x="540" y="215" width="520" height="82" rx="18" fill="#F1E8D9"/>
+    <text x="800" y="246" text-anchor="middle" font-size="19" font-weight="700" fill="#725E3C">Application state</text>
+    <text x="800" y="276" text-anchor="middle" font-size="16" fill="#69766F">PantryApp + React components</text>
+
+    <g font-size="16">
+      <rect x="540" y="330" width="150" height="100" rx="18" fill="#FFF" stroke="#D5C6AC" stroke-width="2"/>
+      <text x="615" y="368" text-anchor="middle" font-weight="700" fill="#725E3C">1. Listen</text>
+      <text x="615" y="396" text-anchor="middle" fill="#69766F">Budget</text>
+      <text x="615" y="416" text-anchor="middle" fill="#69766F">Preferences</text>
+
+      <rect x="725" y="330" width="150" height="100" rx="18" fill="#FFF" stroke="#D5C6AC" stroke-width="2"/>
+      <text x="800" y="368" text-anchor="middle" font-weight="700" fill="#725E3C">2. Confirm</text>
+      <text x="800" y="396" text-anchor="middle" fill="#69766F">Repeat request</text>
+      <text x="800" y="416" text-anchor="middle" fill="#69766F">Yes or retry</text>
+
+      <rect x="910" y="330" width="150" height="100" rx="18" fill="#FFF" stroke="#D5C6AC" stroke-width="2"/>
+      <text x="985" y="368" text-anchor="middle" font-weight="700" fill="#725E3C">3. Plan</text>
+      <text x="985" y="396" text-anchor="middle" fill="#69766F">Exactly 3 meals</text>
+      <text x="985" y="416" text-anchor="middle" fill="#69766F">Within budget</text>
+
+      <line x1="690" y1="380" x2="720" y2="380" stroke="#2F5D50" stroke-width="3" marker-end="url(#arrow)"/>
+      <line x1="875" y1="380" x2="905" y2="380" stroke="#2F5D50" stroke-width="3" marker-end="url(#arrow)"/>
+
+      <rect x="540" y="470" width="520" height="105" rx="18" fill="#E7F0EA"/>
+      <text x="800" y="502" text-anchor="middle" font-size="18" font-weight="700" fill="#2F5D50">Meal plan data</text>
+      <text x="800" y="535" text-anchor="middle" fill="#69766F">Name · cuisine · cost · prep time · ingredients</text>
+      <text x="800" y="560" text-anchor="middle" fill="#69766F">Nutrition · image prompt · step-by-step instructions</text>
+
+      <rect x="540" y="610" width="520" height="95" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="800" y="642" text-anchor="middle" font-size="18" font-weight="700" fill="#2F5D50">Browser voice layer</text>
+      <text x="800" y="674" text-anchor="middle" fill="#69766F">Microphone → Gemini Live → PCM speech playback</text>
+
+      <rect x="540" y="740" width="520" height="105" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="800" y="772" text-anchor="middle" font-size="18" font-weight="700" fill="#2F5D50">Enrichment logic</text>
+      <text x="800" y="804" text-anchor="middle" fill="#69766F">Journey Foods nutrition lookup + safe fallbacks</text>
+      <text x="800" y="830" text-anchor="middle" fill="#69766F">Retry and error handling</text>
+    </g>
+
+    <!-- Right: server services -->
+    <g filter="url(#shadow)">
+      <rect x="1205" y="185" width="320" height="690" rx="26" fill="#FFFFFF" stroke="#DDD7CA" stroke-width="2"/>
+    </g>
+
+    <rect x="1235" y="215" width="260" height="82" rx="18" fill="#E7F0EA"/>
+    <text x="1365" y="246" text-anchor="middle" font-size="19" font-weight="700" fill="#2F5D50">Server routes</text>
+    <text x="1365" y="276" text-anchor="middle" font-size="16" fill="#69766F">TanStack Start / Cloudflare</text>
+
+    <g font-size="16">
+      <rect x="1235" y="330" width="260" height="82" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="1365" y="358" text-anchor="middle" font-weight="700" fill="#2F5D50">/api/live-token</text>
+      <text x="1365" y="386" text-anchor="middle" fill="#69766F">Google voice session</text>
+
+      <rect x="1235" y="440" width="260" height="82" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="1365" y="468" text-anchor="middle" font-weight="700" fill="#2F5D50">/api/meals</text>
+      <text x="1365" y="496" text-anchor="middle" fill="#69766F">Budget-aware JSON plan</text>
+
+      <rect x="1235" y="550" width="260" height="82" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="1365" y="578" text-anchor="middle" font-weight="700" fill="#2F5D50">/api/food</text>
+      <text x="1365" y="606" text-anchor="middle" fill="#69766F">Nutrition API proxy</text>
+
+      <rect x="1235" y="660" width="260" height="82" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="1365" y="688" text-anchor="middle" font-weight="700" fill="#2F5D50">/api/sms</text>
+      <text x="1365" y="716" text-anchor="middle" fill="#69766F">Twilio or phone fallback</text>
+
+      <rect x="1235" y="770" width="260" height="82" rx="18" fill="#FFF" stroke="#C9D7CF" stroke-width="2"/>
+      <text x="1365" y="798" text-anchor="middle" font-weight="700" fill="#2F5D50">External APIs</text>
+      <text x="1365" y="826" text-anchor="middle" fill="#69766F">Google · Journey Foods · Twilio</text>
+    </g>
+
+    <!-- Cross-column arrows -->
+    <line x1="395" y1="530" x2="505" y2="530" stroke="#2F5D50" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="450" y="510" text-anchor="middle" font-size="14" fill="#69766F">interact</text>
+
+    <line x1="1090" y1="530" x2="1200" y2="530" stroke="#2F5D50" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="1145" y="510" text-anchor="middle" font-size="14" fill="#69766F">fetch</text>
+
+    <!-- Footer -->
+    <rect x="510" y="915" width="580" height="48" rx="24" fill="#2F5D50"/>
+    <text x="800" y="946" text-anchor="middle" font-size="17" font-weight="700" fill="#FFFFFF">Voice request → structured meal plan → pantry → grocery list → cooking</text>
+  </g>
+</svg>
